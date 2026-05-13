@@ -20,22 +20,20 @@ module tt_um_srflipflop (
         if (!rst_n)
             Q <= 1'b0;
         else begin
-            case ({S, R})
-                2'b00: Q <= Q;     // Hold
-                2'b01: Q <= 1'b0;  // Reset
-                2'b10: Q <= 1'b1;  // Set
-                2'b11: Q <= 1'b0;  // Invalid (safe reset)
+            case ({S,R})
+                2'b10: Q <= 1'b1;
+                2'b01: Q <= 1'b0;
+                2'b00: Q <= Q;
+                2'b11: Q <= 1'b0;
             endcase
         end
     end
 
     assign uo_out[0] = Q;
     assign uo_out[1] = ~Q;
-    assign uo_out[7:2] = 6'b0;
+    assign uo_out[7:2] = 0;
 
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
-
-    wire _unused = &{ena, uio_in, 1'b0};
+    assign uio_out = 0;
+    assign uio_oe  = 0;
 
 endmodule
