@@ -1,20 +1,16 @@
-<!---
-
-This file is used to generate your project datasheet. Please fill in the information below and delete any unused
-sections.
-
-You can also include images in this folder and reference them in the markdown. Each image must be less than
-512 kb in size, and the combined size of all images must be less than 1 MB.
--->
-
 ## How it works
 
-Explain how your project works
+SR Flip-Flop implemented in Verilog.
+
+- `ui_in[0]` = Set (S)
+- `ui_in[1]` = Reset (R)
+- `uo_out[0]` = Q
+- `uo_out[1]` = Q̅
 
 ## How to test
+iverilog -o sim tb.v tt_um_srflipflop.v
+vvp sim
+gtkwave sr_flipflop.vcd
+##External hardware
 
-Explain how to use your project
-
-## External hardware
-
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+No external hardware required.
