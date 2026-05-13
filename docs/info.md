@@ -11,6 +11,7 @@ SR Flip-Flop implemented in Verilog.
 iverilog -o sim tb.v tt_um_srflipflop.v
 vvp sim
 gtkwave sr_flipflop.vcd
-##External hardware
+
+## External hardware
 
 No external hardware required.
