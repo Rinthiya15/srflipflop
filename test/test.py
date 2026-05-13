@@ -2,15 +2,15 @@
 `timescale 1ns / 1ps
 
 /*
- * Testbench for SR Flip-Flop (Tiny Tapeout)
+ * Testbench for SR Flip-Flop (VCD Dump Enabled)
  */
 
 module tb;
 
-  // Dump waveform
+  // Generate VCD waveform file
   initial begin
-    $dumpfile("tb.fst");
-    $dumpvars(0, tb);
+    $dumpfile("sr_flipflop.vcd");   // VCD file name
+    $dumpvars(0, tb);               // Dump all signals in testbench
   end
 
   // Inputs
@@ -51,58 +51,52 @@ module tb;
   // Clock generation
   initial begin
     clk = 0;
-    forever #5 clk = ~clk;
+    forever #5 clk = ~clk;   // 10ns clock period
   end
 
-  // Stimulus
+  // Stimulus block
   initial begin
 
-    // Initialize signals
+    // Initialize inputs
     ena    = 1'b1;
     rst_n  = 1'b0;
-    ui_in  = 8'b0;
-    uio_in = 8'b0;
+    ui_in  = 8'b00000000;
+    uio_in = 8'b00000000;
 
-    // Reset
+    // Apply reset
     #10;
     rst_n = 1'b1;
 
-    // -------------------
-    // SR Flip-Flop Tests
-    // -------------------
+    // -------------------------
+    // SR Flip-Flop Operations
+    // -------------------------
 
     // HOLD : S=0 R=0
-    ui_in[0] = 0;   // S
-    ui_in[1] = 0;   // R
+    ui_in[0] = 0;
+    ui_in[1] = 0;
     #10;
-    $display("HOLD  : Q = %b", uo_out[0]);
 
     // SET : S=1 R=0
     ui_in[0] = 1;
     ui_in[1] = 0;
     #10;
-    $display("SET   : Q = %b", uo_out[0]);
 
-    // HOLD after SET
+    // HOLD
     ui_in[0] = 0;
     ui_in[1] = 0;
     #10;
-    $display("HOLD  : Q = %b", uo_out[0]);
 
     // RESET : S=0 R=1
     ui_in[0] = 0;
     ui_in[1] = 1;
     #10;
-    $display("RESET : Q = %b", uo_out[0]);
 
     // INVALID : S=1 R=1
     ui_in[0] = 1;
     ui_in[1] = 1;
     #10;
-    $display("INVALID : Q = %b", uo_out[0]);
 
     // End simulation
-    #10;
     $finish;
   end
 
