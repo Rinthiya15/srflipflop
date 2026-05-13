@@ -1,103 +1,61 @@
-`default_nettype none
-`timescale 1ns / 1ps
+import cocotb
+from cocotb.triggers import RisingEdge, Timer
 
-/*
- * Testbench for SR Flip-Flop (VCD Dump Enabled)
- */
 
-module tb;
+async def reset_dut(dut):
+    dut.rst_n.value = 0
+    dut.ui_in.value = 0
+    dut.uio_in.value = 0
+    dut.ena.value = 1
+    await Timer(10, units="ns")
+    dut.rst_n.value = 1
+    await Timer(10, units="ns")
 
-  // Generate VCD waveform file
-  initial begin
-    $dumpfile("sr_flipflop.vcd");   // VCD file name
-    $dumpvars(0, tb);               // Dump all signals in testbench
-  end
 
-  // Inputs
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
+@cocotb.test()
+async def sr_flipflop_test(dut):
 
-  // Outputs
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    # Reset
+    await reset_dut(dut)
 
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+    # -------------------
+    # HOLD (S=0, R=0)
+    # -------------------
+    dut.ui_in.value = 0b00
+    await RisingEdge(dut.clk)
 
-  // DUT Instantiation
-  tt_um_srflipflop dut (
+    q = dut.uo_out.value.integer & 1
+    dut._log.info(f"HOLD Q = {q}")
 
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
+    # -------------------
+    # SET (S=1, R=0)
+    # -------------------
+    dut.ui_in.value = 0b01
+    await RisingEdge(dut.clk)
 
-      .ui_in(ui_in),
-      .uo_out(uo_out),
-      .uio_in(uio_in),
-      .uio_out(uio_out),
-      .uio_oe(uio_oe),
-      .ena(ena),
-      .clk(clk),
-      .rst_n(rst_n)
-  );
+    q = dut.uo_out.value.integer & 1
+    dut._log.info(f"SET Q = {q}")
 
-  // Clock generation
-  initial begin
-    clk = 0;
-    forever #5 clk = ~clk;   // 10ns clock period
-  end
+    # -------------------
+    # HOLD
+    # -------------------
+    dut.ui_in.value = 0b00
+    await RisingEdge(dut.clk)
 
-  // Stimulus block
-  initial begin
+    # -------------------
+    # RESET (S=0, R=1)
+    # -------------------
+    dut.ui_in.value = 0b10
+    await RisingEdge(dut.clk)
 
-    // Initialize inputs
-    ena    = 1'b1;
-    rst_n  = 1'b0;
-    ui_in  = 8'b00000000;
-    uio_in = 8'b00000000;
+    q = dut.uo_out.value.integer & 1
+    dut._log.info(f"RESET Q = {q}")
 
-    // Apply reset
-    #10;
-    rst_n = 1'b1;
+    # -------------------
+    # INVALID (S=1, R=1)
+    # -------------------
+    dut.ui_in.value = 0b11
+    await RisingEdge(dut.clk)
 
-    // -------------------------
-    // SR Flip-Flop Operations
-    // -------------------------
-
-    // HOLD : S=0 R=0
-    ui_in[0] = 0;
-    ui_in[1] = 0;
-    #10;
-
-    // SET : S=1 R=0
-    ui_in[0] = 1;
-    ui_in[1] = 0;
-    #10;
-
-    // HOLD
-    ui_in[0] = 0;
-    ui_in[1] = 0;
-    #10;
-
-    // RESET : S=0 R=1
-    ui_in[0] = 0;
-    ui_in[1] = 1;
-    #10;
-
-    // INVALID : S=1 R=1
-    ui_in[0] = 1;
-    ui_in[1] = 1;
-    #10;
-
-    // End simulation
-    $finish;
-  end
-
-endmodule
+    q = dut.uo_out.value.integer & 1
+    dut._log.info(f"INVALID Q = {q}")
