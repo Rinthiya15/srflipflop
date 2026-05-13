@@ -2,7 +2,7 @@ import cocotb
 from cocotb.triggers import RisingEdge, Timer
 
 
-async def reset_dut(dut):
+async def reset(dut):
     dut.rst_n.value = 0
     dut.ui_in.value = 0
     dut.uio_in.value = 0
@@ -15,47 +15,24 @@ async def reset_dut(dut):
 @cocotb.test()
 async def sr_flipflop_test(dut):
 
-    # Reset
-    await reset_dut(dut)
+    await reset(dut)
 
-    # -------------------
-    # HOLD (S=0, R=0)
-    # -------------------
+    # HOLD (S=0 R=0)
     dut.ui_in.value = 0b00
     await RisingEdge(dut.clk)
 
-    q = dut.uo_out.value.integer & 1
-    dut._log.info(f"HOLD Q = {q}")
-
-    # -------------------
-    # SET (S=1, R=0)
-    # -------------------
+    # SET (S=1 R=0)
     dut.ui_in.value = 0b01
     await RisingEdge(dut.clk)
 
-    q = dut.uo_out.value.integer & 1
-    dut._log.info(f"SET Q = {q}")
-
-    # -------------------
     # HOLD
-    # -------------------
     dut.ui_in.value = 0b00
     await RisingEdge(dut.clk)
 
-    # -------------------
-    # RESET (S=0, R=1)
-    # -------------------
+    # RESET (S=0 R=1)
     dut.ui_in.value = 0b10
     await RisingEdge(dut.clk)
 
-    q = dut.uo_out.value.integer & 1
-    dut._log.info(f"RESET Q = {q}")
-
-    # -------------------
-    # INVALID (S=1, R=1)
-    # -------------------
+    # INVALID (S=1 R=1)
     dut.ui_in.value = 0b11
     await RisingEdge(dut.clk)
-
-    q = dut.uo_out.value.integer & 1
-    dut._log.info(f"INVALID Q = {q}")
