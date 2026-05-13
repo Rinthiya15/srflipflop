@@ -4,7 +4,7 @@
 module tb;
 
   initial begin
-    $dumpfile("sr_flipflop.vcd");
+    $dumpfile("srflipflop.vcd");
     $dumpvars(0, tb);
   end
 
